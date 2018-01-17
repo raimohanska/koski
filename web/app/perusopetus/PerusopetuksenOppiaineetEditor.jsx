@@ -21,21 +21,40 @@ import {UusiPerusopetuksenOppiaineDropdown} from './UusiPerusopetuksenOppiaineDr
 import {accumulateExpandedState} from '../editor/ExpandableItems'
 import {t} from '../i18n/i18n'
 import Text from '../i18n/Text'
-import {isToimintaAlueittain, isYsiluokka, jääLuokalle, luokkaAste, luokkaAsteenOsasuoritukset} from './Perusopetus'
+import {
+  isKorotus,
+  isPainotettu,
+  isToimintaAlueittain, isYksilöllistetty, isYsiluokka, jääLuokalle, luokkaAste,
+  luokkaAsteenOsasuoritukset
+} from './Perusopetus'
 import {expandableProperties, PerusopetuksenOppiaineRowEditor} from './PerusopetuksenOppiaineRowEditor'
+import {FootnoteDescriptions} from '../components/footnote'
 
 var pakollisetTitle = 'Pakolliset oppiaineet'
 var valinnaisetTitle = 'Valinnaiset oppiaineet'
 let groupTitleForSuoritus = suoritus => modelData(suoritus).koulutusmoduuli.pakollinen ? pakollisetTitle : valinnaisetTitle
 
+const YksilöllistettyFootnote = {title: 'Yksilöllistetty oppimäärä', hint: '*'}
+const PainotettuFootnote = {title: 'Painotettu opetus', hint: '**'}
+const KorotusFootnote = {title: 'Perusopetuksen päättötodistuksen arvosanan korotus', hint: '†'}
+
+const footnoteDescriptions = oppiaineSuoritukset => [
+  oppiaineSuoritukset.find(isYksilöllistetty) && YksilöllistettyFootnote,
+  oppiaineSuoritukset.find(isPainotettu) && PainotettuFootnote,
+  oppiaineSuoritukset.find(isKorotus) && KorotusFootnote
+].filter(v => !!v)
+
+const footnotesForSuoritus = suoritus => [
+  isYksilöllistetty(suoritus) && YksilöllistettyFootnote,
+  isPainotettu(suoritus) && PainotettuFootnote,
+  isKorotus(suoritus) && KorotusFootnote
+].filter(v => !!v)
+
 export const PerusopetuksenOppiaineetEditor = ({model}) => {
   model = addContext(model, { suoritus: model })
   let oppiaineSuoritukset = modelItems(model, 'osasuoritukset')
 
-  let korotus = oppiaineSuoritukset.find(s => modelData(s, 'korotus')) ? ['† = perusopetuksen päättötodistuksen arvosanan korotus'] : []
-  let yksilöllistetty = oppiaineSuoritukset.find(s => modelData(s, 'yksilöllistettyOppimäärä')) ? ['* = yksilöllistetty oppimäärä'] : []
-  let painotettu = oppiaineSuoritukset.find(s => modelData(s, 'painotettuOpetus')) ? ['** = painotettu opetus'] : []
-  let selitteet = korotus.concat(yksilöllistetty).concat(painotettu).join(', ')
+  const footnotes = footnoteDescriptions(oppiaineSuoritukset)
   let uusiOppiaineenSuoritus = model.context.edit ? createOppiaineenSuoritus(modelLookup(model, 'osasuoritukset')) : null
   let showOppiaineet = !(isYsiluokka(model) && !jääLuokalle(model)) && (model.context.edit || valmiitaSuorituksia(oppiaineSuoritukset))
 
@@ -61,7 +80,7 @@ export const PerusopetuksenOppiaineetEditor = ({model}) => {
             ? <GroupedOppiaineetEditor model={model} uusiOppiaineenSuoritus={uusiOppiaineenSuoritus}/>
             : <SimpleOppiaineetEditor model={model} uusiOppiaineenSuoritus={uusiOppiaineenSuoritus}/>
         }
-        {selitteet && <p className="selitteet">{selitteet}</p>}
+        {!R.isEmpty(footnotes) && <FootnoteDescriptions data={footnotes}/>}
       </div>)
     }
   </div>)
@@ -132,7 +151,7 @@ class Oppiainetaulukko extends React.Component {
 
     let edit = model.context.edit
     let showLaajuus = (!!suoritukset.find(s => modelData(s, 'koulutusmoduuli.laajuus')) && !edit && !pakolliset) || (edit && !pakolliset)
-    let showFootnotes = !edit && !!suoritukset.find(s => modelData(s, 'yksilöllistettyOppimäärä') ||modelData(s, 'painotettuOpetus') || modelData(s, 'korotus'))
+    const showFootnotes = !edit && !R.isEmpty(footnoteDescriptions(suoritukset))
 
     let addOppiaine = oppiaine => {
       var suoritusUudellaOppiaineella = modelSet(uusiOppiaineenSuoritus, oppiaine, 'koulutusmoduuli')
@@ -172,7 +191,7 @@ class Oppiainetaulukko extends React.Component {
                   expanded={isExpandedP(suoritus)}
                   onExpand={setExpanded(suoritus)}
                   showLaajuus={showLaajuus}
-                  showFootnotes={showFootnotes}
+                  footnotes={footnotesForSuoritus(suoritus)}
                 />
               ))
             }
