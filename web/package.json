@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "@skidding/react-codemirror": "^1.0.0",
-    "bacon.atom": "^5.0.2",
-    "baconjs": "^1",
-    "baret": "^1.0.6",
+    "bacon.atom": "^5.0.5",
+    "baconjs": "baconjs/bacon.js#2.0",
+    "baret": "^1.1",
     "codemirror": "^5.30.0",
     "es6-promise": "^4.1.1",
     "fecha": "^2.3.1",
