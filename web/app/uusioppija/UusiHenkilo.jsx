@@ -76,5 +76,5 @@ const splitName = (name) => {
 }
 
 const sanitizeFirstnames = (name) => {
-  return name.trim().replace(/\s+/g, ' ').replace(/\s*-\s*/g, '-')
+  return (name || '').trim().replace(/\s+/g, ' ').replace(/\s*-\s*/g, '-')
 }

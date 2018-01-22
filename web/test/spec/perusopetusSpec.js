@@ -1430,7 +1430,7 @@ describe('Perusopetus', function() {
         })
       })
 
-      describe('Kun tallennuksen jälkeinen lataus epäonnistuu', function( ){
+      describe.skip('Kun tallennuksen jälkeinen lataus epäonnistuu', function( ){
         before(
           editor.edit,
           editor.property('todistuksellaNäkyvätLisätiedot').setValue('blerg'),
@@ -2080,7 +2080,7 @@ describe('Perusopetus', function() {
               it('Toimipiste on oikein', function() {
                 expect(editor.property('toimipiste').getValue()).to.equal('Jyväskylän normaalikoulu, alakoulu')
               })
-              describe('Tutkinnon peruste', function() {
+              describe.skip('Tutkinnon peruste', function() {
                 before(editor.saveChanges)
                 it('Esitäyttää perusteen diaarinumeron', function() {
                   expect(editor.propertyBySelector('.diaarinumero').getValue()).to.equal('104/011/2014')

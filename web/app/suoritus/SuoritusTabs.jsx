@@ -1,5 +1,6 @@
 import React from 'baret'
 import R from 'ramda'
+import Bacon from 'baconjs'
 import {modelData, modelTitle} from '../editor/EditorModel.js'
 import Link from '../components/Link'
 import {currentLocation} from '../util/location.js'
@@ -15,7 +16,7 @@ export const SuoritusTabs = ({ model, suoritukset }) => {
     pushModel(suoritus, model.context.changeBus)
     let suoritukset2 = [suoritus].concat(suoritukset)
     assignTabNames(suoritukset2) // to get the correct tab name for the new suoritus
-    navigateTo(urlForTab(suoritukset2, 0))
+    Bacon.later(0).onValue(() => navigateTo(urlForTab(suoritukset2, 0)))
   }
   let tabTitle = (suoritusModel) => suorituksenTyyppi(suoritusModel) == 'perusopetuksenoppimaara' ? <Text name="Päättötodistus"/> : suoritusTitle(suoritusModel)
 
